@@ -1,10 +1,10 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require "jstore/version"
+require "j_store/version"
 
 Gem::Specification.new do |s|
   s.name        = "jstore"
-  s.version     = Jstore::VERSION
+  s.version     = JStore::VERSION
   s.authors     = ["Woody Peterson"]
   s.email       = ["woody@funnerator.com"]
   s.homepage    = ""

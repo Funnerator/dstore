@@ -1,5 +1,1 @@
-require "jstore/version"
-
-module Jstore
-  # Your code goes here...
-end
+require 'j_store'
