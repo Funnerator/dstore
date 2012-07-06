@@ -1,5 +1,6 @@
 require 'active_support/core_ext/string/inflections'
 require 'active_support/inflector'
+require 'j_store/extensions'
 
 module JStore
   autoload :Document, 'j_store/document'
