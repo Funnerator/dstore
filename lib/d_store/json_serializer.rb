@@ -1,9 +1,9 @@
 require 'json'
 
-module JStore
+module DStore
   module JSONSerializer
     def self.load(source)
-      JStore::Helper.deep_symbolize_keys!(JSON.parse(source || '{}'))
+      DStore::Helper.deep_symbolize_keys!(JSON.parse(source || '{}'))
     end
 
     def self.dump(source)

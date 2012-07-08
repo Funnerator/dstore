@@ -1,17 +1,17 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require "j_store/version"
+require "d_store/version"
 
 Gem::Specification.new do |s|
-  s.name        = "jstore"
-  s.version     = JStore::VERSION
+  s.name        = "dstore"
+  s.version     = DStore::VERSION
   s.authors     = ["Woody Peterson"]
   s.email       = ["woody@funnerator.com"]
   s.homepage    = ""
   s.summary     = %q{TODO: Write a gem summary}
   s.description = %q{TODO: Write a gem description}
 
-  s.rubyforge_project = "jstore"
+  s.rubyforge_project = "dstore"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")

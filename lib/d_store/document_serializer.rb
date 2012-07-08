@@ -1,15 +1,15 @@
 require 'json'
 
-module JStore
+module DStore
   class DocumentSerializer
     attr_reader :collection, :key, :class_name
 
     def initialize(column, options = {})
-      @class_name = JStore::Helper.class_name_from_column(
+      @class_name = DStore::Helper.class_name_from_column(
         :column     => column,
         :class_name => options[:class_name],
         :namespace  => options[:namespace])
-      @collection = JStore::Helper.collection?(column, options)
+      @collection = DStore::Helper.collection?(column, options)
     end
 
     def load(source)
@@ -30,7 +30,7 @@ module JStore
       end
 
       @class_name.constantize.new(
-        JStore::Helper.deep_symbolize_keys!(source))
+        DStore::Helper.deep_symbolize_keys!(source))
     end
 
     def dump(document)

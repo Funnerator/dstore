@@ -1,13 +1,13 @@
 require 'active_support/core_ext/string/inflections'
 require 'active_support/inflector'
-require 'j_store/extensions'
-require 'j_store/integrations'
+require 'd_store/extensions'
+require 'd_store/integrations'
 
-module JStore
-  autoload :Document,           'j_store/document'
-  autoload :MethodBuilder,      'j_store/method_builder'
-  autoload :Helper,             'j_store/helper'
-  autoload :DocumentSerializer, 'j_store/document_serializer'
-  autoload :JSONSerializer,     'j_store/json_serializer'
-  autoload :VERSION,            'j_store/version'
+module DStore
+  autoload :Document,           'd_store/document'
+  autoload :MethodBuilder,      'd_store/method_builder'
+  autoload :Helper,             'd_store/helper'
+  autoload :DocumentSerializer, 'd_store/document_serializer'
+  autoload :JSONSerializer,     'd_store/json_serializer'
+  autoload :VERSION,            'd_store/version'
 end

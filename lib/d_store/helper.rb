@@ -1,4 +1,4 @@
-module JStore
+module DStore
   module Helper
     class << self
       def class_name_from_column(args)
@@ -29,7 +29,7 @@ module JStore
         if (options.has_key?(:collection) &&
             options[:collection]) ||
           (!options.has_key?(:collection) &&
-           JStore::Helper.plural?(attr_name))
+           DStore::Helper.plural?(attr_name))
 
           options.delete(:collection)
 

@@ -4,7 +4,7 @@ module ActiveRecordTest
   if !defined?(ActiveRecord)
 
     require 'active_record'
-    load 'lib/j_store/integrations.rb'
+    load 'lib/d_store/integrations.rb'
 
     ActiveRecord::Base.establish_connection(
       :adapter => 'sqlite3',
@@ -27,24 +27,24 @@ module ActiveRecordTest
   class Blog < ActiveRecord::Base
     self.table_name =  'ar_blogs'
 
-    jstore :author
-    jstore :tags
-    jstore :posts
+    dstore :author
+    dstore :tags
+    dstore :posts
 
     class Author
-      include JStore::Document
+      include DStore::Document
 
       attribute :name
     end
 
     class Tag
-      include JStore::Document
+      include DStore::Document
 
       attribute :name
     end
 
     class Post
-      include JStore::Document
+      include DStore::Document
 
       attribute :title
       attribute :body
@@ -56,7 +56,7 @@ module ActiveRecordTest
     end
   end
 
-  describe 'JStore' do
+  describe 'DStore' do
     let(:blog) { Blog.new }
 
     describe 'one-relationships' do

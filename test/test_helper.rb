@@ -4,5 +4,5 @@ require 'pry'
 
 $:.unshift File.expand_path("lib")
 require 'active_model'
-require 'j_store'
+require 'd_store'
 

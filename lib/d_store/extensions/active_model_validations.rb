@@ -2,11 +2,11 @@ module ActiveModel::Validations::ClassMethods
   def self.extended(base)
     super
     unless base.respond_to?(:validates_associated)
-      base.extend JStoreExtension
+      base.extend DStoreExtension
     end
   end
 
-  module JStoreExtension
+  module DStoreExtension
     def validates_associated(*associations)
       class_eval do
         validates_each(associations) do |record, associate_name, value|

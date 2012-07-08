@@ -1,18 +1,18 @@
 require_relative 'test_helper'
 require 'active_model'
-load 'lib/j_store/extensions.rb'
+load 'lib/d_store/extensions.rb'
 
 module ActiveModelValidationTest
 
   class Blog
-    include JStore::Document
+    include DStore::Document
     include ActiveModel::Validations
 
-    jstore :author
+    dstore :author
     validates_associated :author
 
     class Author
-      include JStore::Document
+      include DStore::Document
       include ActiveModel::Validations
 
       attribute :name
