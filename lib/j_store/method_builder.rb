@@ -1,32 +1,43 @@
 module JStore
-  class API
-    attr_reader :target_class
+  class MethodBuilder
+    attr_reader :target_class, :storage_attr
 
-    def initialize(target_class)
+    def initialize(target_class, storage_attr = :jstore)
       @target_class = target_class
+      @storage_attr = storage_attr
     end
 
-    def attribute(attr_name)
+    def define_attribute(attr_name, options = {})
+      storage_attr = @storage_attr
       target_class.instance_eval do
         # def title
         #   jstore[:title]
         # end
         define_method attr_name do
-          jstore[attr_name]
+          send(storage_attr)[attr_name]
         end
 
         # def title=(val)
         #   jstore[:title] = val
         # end
         define_method "#{attr_name}=" do |value|
-          jstore[attr_name] = value
+          send(storage_attr)[attr_name] = value
         end
+      end
+    end
+
+    def define_document_accessor(relationship_name, options = {})
+      if JStore::Helper.collection?(relationship_name, options)
+        define_collection_document_accessor(relationship_name, options)
+      else
+        define_singular_document_accessor(relationship_name, options)
       end
     end
 
     # Options:
     # * :class_name - specify which class to use for the relationship
-    def one(relationship_name, options = {})
+    def define_singular_document_accessor(relationship_name, options = {})
+      storage_attr = @storage_attr
       target_class.instance_eval do
         # def author
         #   if jstore[:author].any? && !instance_variable_defined?('@author')
@@ -37,13 +48,15 @@ module JStore
         # end
         define_method relationship_name do
           ivar = "@#{relationship_name}"
-          if jstore[relationship_name] &&
-             !jstore[relationship_name].empty? &&
+          if send(storage_attr)[relationship_name] &&
+             !send(storage_attr)[relationship_name].empty? &&
              !instance_variable_defined?(ivar)
             instance_variable_set(ivar,
-              "#{self.class.name}::"\
-              "#{options[:class_name] || relationship_name.to_s.camelize}".constantize.
-              new(jstore[relationship_name]) )
+              JStore::Helper.class_name_from_column(
+                :namespace  => self.class.name,
+                :class_name => options[:class_name],
+                :column     => relationship_name
+              ).constantize.new(send(storage_attr)[relationship_name]) )
           end
 
           instance_variable_get(ivar)
@@ -55,12 +68,14 @@ module JStore
         # end
         define_method "#{relationship_name}=" do |relationship_object|
           if relationship_object.is_a?(Hash)
-            send("#{relationship_name}=", "#{self.class.name}::"\
-              "#{options[:class_name] || relationship_name.to_s.camelize}".constantize.
-              new(relationship_object) )
+            send("#{relationship_name}=", JStore::Helper.class_name_from_column(
+              :namespace  => self.class.name,
+              :class_name => options[:class_name],
+              :column     => relationship_name
+            ).constantize.new(relationship_object) )
           else
             instance_variable_set("@#{relationship_name}", relationship_object)
-            jstore[relationship_name] = relationship_object.jstore
+            send(storage_attr)[relationship_name] = relationship_object.jstore
           end
         end
       end
@@ -68,7 +83,8 @@ module JStore
 
     # Options:
     # * :class_name - specify which class to use for the relationship
-    def many(relationship_name, options = {})
+    def define_collection_document_accessor(relationship_name, options = {})
+      storage_attr = @storage_attr
       target_class.instance_eval do
         # def posts
         #   if jstore[:posts].any? && !instance_variable_defined?('@posts')
@@ -82,15 +98,17 @@ module JStore
         # end
         define_method relationship_name do
           ivar = "@#{relationship_name}"
-          if jstore[relationship_name] &&
-             !jstore[relationship_name].empty? &&
+          if send(storage_attr)[relationship_name] &&
+             !send(storage_attr)[relationship_name].empty? &&
              !instance_variable_defined?(ivar)
             acc = []
             instance_variable_set(ivar, acc)
-            jstore[relationship_name].each do |relation_attrs|
-              acc << "#{self.class.name}::"\
-                "#{options[:class_name] || relationship_name.to_s.singularize.camelize}".constantize.
-                new(relation_attrs)
+            send(storage_attr)[relationship_name].each do |relation_attrs|
+              acc << JStore::Helper.class_name_from_column(
+                :namespace  => self.class.name,
+                :class_name => options[:class_name],
+                :column     => relationship_name
+              ).constantize.new(relation_attrs)
             end
           end
 
@@ -104,16 +122,19 @@ module JStore
         define_method "#{relationship_name}=" do |relationship_objects|
           if relationship_objects.first.is_a?(Hash)
             send("#{relationship_name}=", relationship_objects.map do |relationship_object|
-              "#{self.class.name}::"\
-              "#{options[:class_name] || relationship_name.to_s.singularize.camelize}".constantize.
-              new(relationship_object)
+              JStore::Helper.class_name_from_column(
+                :namespace  => self.class.name,
+                :class_name => options[:class_name],
+                :column     => relationship_name
+              ).constantize.new(relationship_object)
             end )
           else
             instance_variable_set("@#{relationship_name}", relationship_objects)
-            jstore[relationship_name] = relationship_objects.map(&:jstore)
+            send(storage_attr)[relationship_name] = relationship_objects.map(&:jstore)
           end
         end
       end
     end
+
   end
 end

@@ -1,35 +1,33 @@
 require_relative 'test_helper'
-module JStoreTest
+module JStoreDocumentTest
 
   class Blog
     include JStore::Document
     attr_accessor :jstore
 
-    jstore do
-      attribute :title
+    attribute :title
 
-      one :author
-      many :posts
-      many :tags
+    one :author
+    many :posts
+    many :tags
 
-      one :secondary_author, :class_name => 'Author'
-      many :archived_posts, :class_name => 'Post'
-    end
+    one :secondary_author, :class_name => 'Author'
+    many :archived_posts, :class_name => 'Post'
 
     class Author
-      include JStore::Entity
+      include JStore::Document
 
       attribute :name
     end
 
     class Tag
-      include JStore::Entity
+      include JStore::Document
 
       attribute :name
     end
 
     class Post
-      include JStore::Entity
+      include JStore::Document
 
       attribute :title
       attribute :body
