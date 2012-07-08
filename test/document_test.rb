@@ -177,6 +177,12 @@ module DStoreDocumentTest
         blog.archived_posts.first.title.must_equal 'Dogs are OK I guess'
       end
     end
+
+    # Might want to figure out reasonable cases for handling
+    # arguments to our as_json
+    it 'ignores as_json arguments (often passed in by rails)' do
+      blog.as_json(:foo => 'bar').must_equal blog.as_json
+    end
   end
 
 end

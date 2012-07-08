@@ -19,7 +19,7 @@ module DStore
       end
     end
 
-    def as_json
+    def as_json(*args)
       @dstore
     end
 
