@@ -21,7 +21,7 @@ module DStore
     end
 
     def load_collection(source)
-      return nil if source.nil?
+      return [] if source.nil?
 
       JSON.parse(source).map {|hash| load_singular(hash)}
     end
