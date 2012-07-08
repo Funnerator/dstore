@@ -41,6 +41,10 @@ module DStore
       def many(relationship_name, options = {})
         @dstore_api.define_collection_document_accessor(relationship_name, options)
       end
+
+      def inherited(base)
+        base.instance_variable_set('@dstore_api', DStore::MethodBuilder.new(base))
+      end
     end
   end
 end

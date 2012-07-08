@@ -35,6 +35,7 @@ module DStoreDocumentTest
       many :tags
 
       class Tag < Blog::Tag
+        attribute :category
       end
     end
   end
@@ -152,6 +153,15 @@ module DStoreDocumentTest
           :tags=>[{:name=>"cat"}]
         )
       end
+    end
+
+    it 'can define attributes on subclasses of a DStore::Document' do
+      blog.dstore = {
+        :posts => [
+          { :title => 'Cats, boxes, and birds',
+            :tags => [{:name=>'boxes', :category=>'silly'}] }]}
+
+      blog.posts.first.tags.first.category.must_equal 'silly'
     end
 
     describe '#attribute :class_name option' do
