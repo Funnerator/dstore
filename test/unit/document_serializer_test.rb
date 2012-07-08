@@ -64,4 +64,11 @@ describe 'DStore::DocumentSerializer' do
     subject.load({'title' => 'HeeeloOo'}.to_json).must_equal(
       Foo::Blog.new(:title => 'HeeeloOo'))
   end
+
+  it 'does not crash when loading nil sources' do
+    subject = DStore::DocumentSerializer.new(:blog)
+    subject.load(nil).must_equal nil
+    subject = DStore::DocumentSerializer.new(:blogs)
+    subject.load(nil).must_equal nil
+  end
 end

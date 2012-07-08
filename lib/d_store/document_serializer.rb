@@ -21,10 +21,14 @@ module DStore
     end
 
     def load_collection(source)
+      return nil if source.nil?
+
       JSON.parse(source).map {|hash| load_singular(hash)}
     end
 
     def load_singular(source)
+      return nil if source.nil?
+
       if source.is_a?(String)
         source = JSON.parse(source)
       end
