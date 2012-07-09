@@ -6,7 +6,7 @@ module DStore
                      args[:column].to_s.singularize.camelize
 
         if args[:namespace]
-          class_name = "#{args[:namespace]}::#{class_name}"
+          class_name = "::#{args[:namespace]}::#{class_name}"
         end
 
         class_name
