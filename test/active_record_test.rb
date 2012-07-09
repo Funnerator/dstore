@@ -20,6 +20,7 @@ module ActiveRecordTest
         t.text :author
         t.text :tags
         t.text :posts
+        t.text :widgets
       end
     end
   end
@@ -30,6 +31,8 @@ module ActiveRecordTest
     dstore :author
     dstore :tags
     dstore :posts
+
+    dstore :widgets, :namespace => name + '::Foo::Bar'
 
     class Author
       include DStore::Document
@@ -50,8 +53,18 @@ module ActiveRecordTest
       attribute :body
 
       many :tags
+      many :comments
 
       class Tag < Blog::Tag
+      end
+    end
+
+    module Foo
+      module Bar
+        class Widget
+          include DStore::Document
+          attribute :name
+        end
       end
     end
   end
@@ -114,6 +127,12 @@ module ActiveRecordTest
                "tags"  => [{"name"=>"boxes"}] }]
         )
       end
+    end
+
+    it 'honors the namespace argument' do
+      blog.widgets = [{:name => 'github'}]
+      blog.save; blog.reload
+      blog.widgets.must_equal [Blog::Foo::Bar::Widget.new(:name => 'github')]
     end
 
     def raw_deserialize(klass, id, column)

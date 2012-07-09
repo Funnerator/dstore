@@ -7,7 +7,7 @@ module DStore
             define_document_accessor(column, options)
         else
           serialize column, ::DStore::DocumentSerializer.new(
-            column, options.merge(:namespace => self.name) )
+            column, {:namespace => self.name}.merge(options) )
         end
       end
     end
