@@ -88,6 +88,11 @@ module DStoreDocumentTest
         blog.author.class.must_equal Blog::Author
         blog.author.name.must_equal 'Mr Myowgi'
       end
+
+      it 'defaults nil sources to a loaded object (as opposed to nil)' do
+        blog.dstore['author'] = nil
+        blog.author.class.must_equal Blog::Author
+      end
     end
 
     describe 'many-relationships' do

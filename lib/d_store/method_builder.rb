@@ -50,15 +50,13 @@ module DStore
         # end
         define_method relationship_name do
           ivar = "@#{relationship_name}"
-          if send(storage_attr)[relationship_name] &&
-             !send(storage_attr)[relationship_name].empty? &&
-             !instance_variable_defined?(ivar)
+          if !instance_variable_defined?(ivar)
             instance_variable_set(ivar,
               DStore::Helper.class_name_from_column(
                 :namespace  => options[:namespace] || self.class.name,
                 :class_name => options[:class_name],
                 :column     => relationship_name
-              ).constantize.new(send(storage_attr)[relationship_name]) )
+              ).constantize.new(send(storage_attr)[relationship_name] || {}) )
           end
 
           instance_variable_get(ivar)
@@ -103,17 +101,15 @@ module DStore
         # end
         define_method relationship_name do
           ivar = "@#{relationship_name}"
-          if send(storage_attr)[relationship_name] &&
-             !send(storage_attr)[relationship_name].empty? &&
-             !instance_variable_defined?(ivar)
+          if !instance_variable_defined?(ivar)
             acc = []
             instance_variable_set(ivar, acc)
-            send(storage_attr)[relationship_name].each do |relation_attrs|
+            (send(storage_attr)[relationship_name] || []).each do |attrs|
               acc << DStore::Helper.class_name_from_column(
                 :namespace  => options[:namespace] || self.class.name,
                 :class_name => options[:class_name],
                 :column     => relationship_name
-              ).constantize.new(relation_attrs)
+              ).constantize.new(attrs)
             end
           end
 
