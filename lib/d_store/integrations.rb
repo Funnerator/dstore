@@ -7,4 +7,3 @@ end
 if defined?(ActiveRecord)
   ActiveRecord::Base.extend(DStore::Integrations::ActiveRecord)
 end
-

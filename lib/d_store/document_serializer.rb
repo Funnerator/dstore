@@ -33,8 +33,7 @@ module DStore
         source = JSON.parse(source)
       end
 
-      @class_name.constantize.new(
-        DStore::Helper.deep_symbolize_keys!(source))
+      @class_name.constantize.new(source)
     end
 
     def dump(document)

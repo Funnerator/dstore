@@ -7,7 +7,9 @@ module DStore
     end
 
     def initialize(hash = {})
-      @dstore = DStore::Helper.deep_symbolize_keys!(hash)
+      # note: this destructively modifies the incoming hash;
+      # this is intentional, as we rely on pass by reference
+      @dstore = DStore::Helper.deep_stringify_keys!(hash)
     end
 
     def ==(other)
@@ -45,6 +47,15 @@ module DStore
       def inherited(base)
         base.instance_variable_set('@dstore_api', DStore::MethodBuilder.new(base))
       end
+    end
+
+    # It would be great to do this in the integrations folder, but autoload
+    # is a pita...
+    if defined?(Rails)
+      # to let us use it in a form
+      include ActiveModel::Conversion
+      extend  ActiveModel::Naming
+      def persisted?; false; end
     end
   end
 end

@@ -15,10 +15,10 @@ module DStore
       # this should be a hash extension, but let's not add stuff to the
       # core lib.
       # Taken from Rails' head.
-      def deep_symbolize_keys!(hash)
+      def deep_stringify_keys!(hash)
         hash.keys.each do |key|
           val = hash.delete(key)
-          hash[key.to_sym] = val.is_a?(Hash) ? deep_symbolize_keys!(val) : val
+          hash[key.to_s] = val.is_a?(Hash) ? deep_stringify_keys!(val) : val
         end
         hash
       end

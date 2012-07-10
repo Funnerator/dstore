@@ -3,7 +3,7 @@ require 'json'
 module DStore
   module JSONSerializer
     def self.load(source)
-      DStore::Helper.deep_symbolize_keys!(JSON.parse(source || '{}'))
+      JSON.parse(source || '{}')
     end
 
     def self.dump(source)

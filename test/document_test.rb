@@ -32,7 +32,14 @@ module DStoreDocumentTest
       attribute :title
       attribute :body
 
+      one :location
       many :tags
+
+      class Location
+        include DStore::Document
+
+        attribute :name
+      end
 
       class Tag < Blog::Tag
         attribute :category
@@ -44,40 +51,40 @@ module DStoreDocumentTest
     let(:blog) { Blog.new }
 
     it 'reads attibutes from the dstore hash' do
-      blog.dstore[:title] = 'Cats cats cats'
+      blog.dstore['title'] = 'Cats cats cats'
       blog.title.must_equal('Cats cats cats')
     end
 
     it 'writes attributes to the dstore hash' do
       blog.title = 'Cats cats cats'
-      blog.dstore.must_equal({:title => 'Cats cats cats'})
+      blog.dstore.must_equal({'title' => 'Cats cats cats'})
     end
 
     it 'modifies attributes in the dstore hash' do
-      blog.dstore[:title] = 'Cats cats cats'
+      blog.dstore['title'] = 'Cats cats cats'
       blog.title = 'Cats cats cats cats cats'
       blog.title.must_equal('Cats cats cats cats cats')
     end
 
     describe 'one-relationships' do
       it "reads attributes from the documents' dstore hash" do
-        blog.dstore[:author] = {:name => 'Mr. Myowgi'}
+        blog.dstore['author'] = {'name' => 'Mr. Myowgi'}
         blog.author.name.must_equal 'Mr. Myowgi'
       end
 
       it "writes new relationships to the documents' dstore hash" do
-        blog.author = Blog::Author.new(:name => 'Mr Myowgi')
-        blog.dstore[:author].must_equal(:name => 'Mr Myowgi')
+        blog.author = Blog::Author.new('name' => 'Mr Myowgi')
+        blog.dstore['author'].must_equal('name' => 'Mr Myowgi')
       end
 
       it "modifies attributes from the documents' dstore hash" do
-        blog.dstore[:author] = {:name => 'Mr. Myowgi'}
+        blog.dstore['author'] = {'name' => 'Mr. Myowgi'}
         blog.author.name = 'Mr. Snuggles'
-        blog.dstore[:author][:name].must_equal 'Mr. Snuggles'
+        blog.dstore['author']['name'].must_equal 'Mr. Snuggles'
       end
 
       it 'accepts a hash, and creates an object' do
-        blog.author = {:name => 'Mr Myowgi'}
+        blog.author = {'name' => 'Mr Myowgi'}
         blog.author.class.must_equal Blog::Author
         blog.author.name.must_equal 'Mr Myowgi'
       end
@@ -85,23 +92,23 @@ module DStoreDocumentTest
 
     describe 'many-relationships' do
       it "reads attributes from the documents' dstore hash" do
-        blog.dstore[:posts] = [{:title => 'Ninja cat pounces!'}]
+        blog.dstore['posts'] = [{'title' => 'Ninja cat pounces!'}]
         blog.posts.first.title.must_equal 'Ninja cat pounces!'
       end
 
       it "writes attributes to the documents' dstore hash" do
-        blog.posts = [Blog::Post.new(:title => 'Ninja cat pounces!')]
-        blog.dstore[:posts].must_equal [{:title => 'Ninja cat pounces!'}]
+        blog.posts = [Blog::Post.new('title' => 'Ninja cat pounces!')]
+        blog.dstore['posts'].must_equal [{'title' => 'Ninja cat pounces!'}]
       end
 
       it "modifies attributes from the documents' dstore hash" do
-        blog.dstore[:posts] = [{:title => 'Ninja cat pounces!'}]
+        blog.dstore['posts'] = [{'title' => 'Ninja cat pounces!'}]
         blog.posts.first.title = 'Ninja cat sleeps...'
-        blog.dstore[:posts].must_equal [{:title => 'Ninja cat sleeps...'}]
+        blog.dstore['posts'].must_equal [{'title' => 'Ninja cat sleeps...'}]
       end
 
       it 'accepts an array of hashes, and creates an array of objects' do
-        blog.posts = [{:title => 'Cats and boxes'}]
+        blog.posts = [{'title' => 'Cats and boxes'}]
         blog.posts.first.class.must_equal Blog::Post
         blog.posts.first.title.must_equal 'Cats and boxes'
       end
@@ -110,11 +117,11 @@ module DStoreDocumentTest
     describe 'nested relations' do
       it 'reads nested relationships' do
         blog.dstore = {
-          :posts => [
-            { :title => 'Cats and boxes',
-              :tags => [{:name=>'boxes'}] }
+          'posts' => [
+            { 'title' => 'Cats and boxes',
+              'tags' => [{'name'=>'boxes'}] }
           ],
-          :tags => [{:name=>'cat'}] }
+          'tags' => [{'name'=>'cat'}] }
 
         blog.posts.first.title.must_equal 'Cats and boxes'
         blog.posts.first.tags.first.name.must_equal 'boxes'
@@ -122,57 +129,57 @@ module DStoreDocumentTest
       end
 
       it 'writes nested relationships' do
-        blog.posts = [Blog::Post.new(:name => 'Cats and boxes')]
-        blog.tags  = [Blog::Tag.new(:name => 'cat')]
-        blog.posts.first.tags = [Blog::Tag.new(:name => 'boxes')]
+        blog.posts = [Blog::Post.new('name' => 'Cats and boxes')]
+        blog.tags  = [Blog::Tag.new('name' => 'cat')]
+        blog.posts.first.tags = [Blog::Tag.new('name' => 'boxes')]
 
         blog.dstore.must_equal(
-          :posts => [
-            { :name => "Cats and boxes",
-              :tags => [{:name=>"boxes"}] }
+          'posts' => [
+            { 'name' => "Cats and boxes",
+              'tags' => [{'name'=>"boxes"}] }
           ],
-          :tags=>[{:name=>"cat"}]
+          'tags'=>[{'name'=>"cat"}]
         )
       end
 
       it 'modifies nested relationships' do
         blog.dstore = {
-          :posts => [
-            { :title => 'Cats, boxes, and birds',
-              :tags => [{:name=>'boxes'}] }
+          'posts' => [
+            { 'title' => 'Cats, boxes, and birds',
+              'tags' => [{'name'=>'boxes'}] }
           ],
-          :tags => [{:name=>'cat'}] }
+          'tags' => [{'name'=>'cat'}] }
 
         blog.posts.first.tags.first.name = 'birds'
 
         blog.dstore.must_equal(
-          :posts => [
-            { :title => "Cats, boxes, and birds",
-              :tags => [{:name=>"birds"}] }
+          'posts' => [
+            { 'title' => "Cats, boxes, and birds",
+              'tags' => [{'name'=>"birds"}] }
           ],
-          :tags=>[{:name=>"cat"}]
+          'tags'=>[{'name'=>"cat"}]
         )
       end
     end
 
     it 'can define attributes on subclasses of a DStore::Document' do
       blog.dstore = {
-        :posts => [
-          { :title => 'Cats, boxes, and birds',
-            :tags => [{:name=>'boxes', :category=>'silly'}] }]}
+        'posts' => [
+          { 'title' => 'Cats, boxes, and birds',
+            'tags' => [{'name'=>'boxes', 'category'=>'silly'}] }]}
 
       blog.posts.first.tags.first.category.must_equal 'silly'
     end
 
     describe '#attribute :class_name option' do
       it 'specifies which class to initialize for one-relationships' do
-        blog.dstore[:secondary_author] = {:name => 'Mr. Sniggles'}
+        blog.dstore['secondary_author'] = {'name' => 'Mr. Sniggles'}
         blog.secondary_author.class.must_equal Blog::Author
         blog.secondary_author.name.must_equal 'Mr. Sniggles'
       end
 
       it 'specifies which class to initialize for many-relationships' do
-        blog.dstore[:archived_posts] = [{:title => 'Dogs are OK I guess'}]
+        blog.dstore['archived_posts'] = [{'title' => 'Dogs are OK I guess'}]
         blog.archived_posts.first.class.must_equal Blog::Post
         blog.archived_posts.first.title.must_equal 'Dogs are OK I guess'
       end
@@ -181,7 +188,32 @@ module DStoreDocumentTest
     # Might want to figure out reasonable cases for handling
     # arguments to our as_json
     it 'ignores as_json arguments (often passed in by rails)' do
-      blog.as_json(:foo => 'bar').must_equal blog.as_json
+      blog.as_json('foo' => 'bar').must_equal blog.as_json
+    end
+
+    describe '#*_attributes=' do
+      it 'removes _attributes from keys' do
+        blog.author_attributes = {
+          'name'                => 'Bob',
+          'location_attributes' => {'name' => 'Seattle'} }
+
+        blog.dstore['author'].must_equal(
+          "name"     => "Bob",
+          "location" => {"name" => "Seattle"} )
+      end
+
+      it 'deeply turns params-type arrays into real arrays' do
+        # note: the schema here makes no sense, it's just to test recursion
+        blog.author_attributes = {
+          'name'            => 'Bob',
+          'tags_attributes' => {'0' => {
+            'another_attributes' => {'0' => {
+              'name' =>'seattle'}} }}}
+
+        blog.dstore['author'].must_equal(
+          "name" => "Bob",
+          "tags" => [{"another"=>[{"name"=>"seattle"}]}] )
+      end
     end
   end
 
