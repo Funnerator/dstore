@@ -51,6 +51,8 @@ module DStore
     end
 
     def dump_singular(document)
+      return nil if document.nil?
+
       JSON.fast_generate(document.as_json)
     end
   end
