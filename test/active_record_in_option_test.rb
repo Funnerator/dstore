@@ -24,7 +24,6 @@ module ActiveRecordInOptionTest
   class Blog < ActiveRecord::Base
     self.table_name = 'arin_blogs'
 
-    serialize :dstore, DStore::JSONSerializer
     dstore :author, :in => :dstore
     dstore :posts, :in => :dstore
 
