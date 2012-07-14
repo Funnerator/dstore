@@ -116,14 +116,14 @@ module ActiveRecordTest
       end
 
       it 'writes nested documents into nested json' do
-        blog.posts = [Blog::Post.new(:name => 'Cats and boxes')]
+        blog.posts = [Blog::Post.new(:title => 'Cats and boxes')]
         blog.posts.first.tags = [Blog::Post::Tag.new(:name => 'boxes')]
 
         blog.save; blog.reload
 
         raw_deserialize(Blog, blog.id, :posts).
           must_equal(
-            [{ "name" => "Cats and boxes",
+            [{ "title" => "Cats and boxes",
                "tags"  => [{"name"=>"boxes"}] }]
         )
       end

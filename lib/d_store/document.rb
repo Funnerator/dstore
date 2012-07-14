@@ -10,6 +10,17 @@ module DStore
       # note: this destructively modifies the incoming hash;
       # this is intentional, as we rely on pass by reference
       @dstore = DStore::Helper.deep_stringify_keys!(hash)
+
+      # for many attrs this will be a no-op, but provides an
+      # opportunity to override the attribute setter,
+      # plus raises when it sees something it doesn't know about.
+      #
+      # Most importantly, though, for [relation]_attributes this will
+      # trigger necessary (recursive) document instantiation.
+      @dstore.keys.each do |key|
+        send("#{key}=", @dstore[key])
+        @dstore.delete(key) if key =~ /_attributes$/
+      end
     end
 
     def ==(other)

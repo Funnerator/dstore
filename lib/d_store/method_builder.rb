@@ -68,19 +68,34 @@ module DStore
         # end
         define_method "#{relationship_name}=" do |relationship_object|
           if relationship_object.is_a?(Hash)
-            send("#{relationship_name}=", DStore::Helper.class_name_from_column(
-              :namespace  => options[:namespace] || self.class.name,
-              :class_name => options[:class_name],
-              :column     => relationship_name
-            ).constantize.new(relationship_object) )
+            # got here via instantiation or a form
+            send("#{relationship_name}_attributes=", relationship_object)
           else
             instance_variable_set("@#{relationship_name}", relationship_object)
             send(storage_attr)[relationship_name] = relationship_object.dstore
           end
         end
-      end
 
-      define_singular_document_attributes_accessor(relationship_name)
+        # def author_attributes
+        #   dstore['author']
+        # end
+        define_method("#{relationship_name}_attributes") do
+          send(storage_attr)[relationship_name]
+        end
+
+        # def author_attributes=(attributes)
+        #   current_attributes = dstore[:author]
+        #   self.author = Blog::Author.new(current_attributes.merge(attributes))
+        # end
+        define_method "#{relationship_name}_attributes=" do |attributes|
+          current_attributes = send(storage_attr)[relationship_name] || {}
+          send("#{relationship_name}=", DStore::Helper.class_name_from_column(
+            :namespace  => options[:namespace] || self.class.name,
+            :class_name => options[:class_name],
+            :column     => relationship_name
+          ).constantize.new(current_attributes.merge(attributes)) )
+        end
+      end
     end
 
     # Options:
@@ -122,72 +137,66 @@ module DStore
         # end
         define_method "#{relationship_name}=" do |relationship_objects|
           if relationship_objects.first.is_a?(Hash)
-            send("#{relationship_name}=", relationship_objects.map do |relationship_object|
-              DStore::Helper.class_name_from_column(
-                :namespace  => options[:namespace] || self.class.name,
-                :class_name => options[:class_name],
-                :column     => relationship_name
-              ).constantize.new(relationship_object)
-            end )
+            # got here via instantiation or a form
+            send("#{relationship_name}_attributes=", relationship_objects)
           else
             instance_variable_set("@#{relationship_name}", relationship_objects)
             send(storage_attr)[relationship_name] = relationship_objects.map(&:dstore)
           end
         end
-      end
 
-      define_collection_document_attributes_accessor(relationship_name)
-    end
-
-    def define_singular_document_attributes_accessor(relationship_name)
-      storage_attr = @storage_attr
-      relationship_name = relationship_name.to_s
-      target_class.instance_eval do
+        # def posts_attributes
+        #   dstore['posts']
+        # end
         define_method("#{relationship_name}_attributes") do
           send(storage_attr)[relationship_name]
         end
 
-        define_method("#{relationship_name}_attributes=") do |hash|
-          send("#{relationship_name}=",
-               DStore::MethodBuilder.deep_handle_attributes_from_params!(hash))
-        end
-      end
-    end
+        # def posts_attributes=(attr_collection)
+        #   acc = []
+        #   if attr_collection.is_a?(Hash) # params-style 'array' as a hash
+        #     attr_collection.each_pair do |index, attributes|
+        #       current_attributes =
+        #         dstore[:posts].try(:[], index.to_i) || {}
+        #       acc[index.to_i] =
+        #         Blog::Post.new(current_attributes.merge(attributes))
+        #     end
+        #   else # array of attribute hashes
+        #     attr_collection.each_with_index do |attributes, index|
+        #       current_attributes =
+        #         dstore[:posts].try(:[], index.to_i) || {}
+        #       acc << Blog::Post.new(current_attributes.merge(attributes))
+        #     end
+        #   end
+        #
+        #   self.posts = acc
+        # end
+        define_method "#{relationship_name}_attributes=" do |attr_collection|
+          model_class = DStore::Helper.class_name_from_column(
+            :namespace  => options[:namespace] || self.class.name,
+            :class_name => options[:class_name],
+            :column     => relationship_name
+          ).constantize
 
-    def define_collection_document_attributes_accessor(relationship_name)
-      storage_attr = @storage_attr
-      relationship_name = relationship_name.to_s
-      target_class.instance_eval do
-        define_method("#{relationship_name}_attributes") do
-          send(storage_attr)[relationship_name]
-        end
-
-        define_method("#{relationship_name}_attributes=") do |hash|
-          send("#{relationship_name}=",
-               hash.values.map {|attrs|
-                 DStore::MethodBuilder.deep_handle_attributes_from_params!(attrs)
-               })
-        end
-      end
-    end
-
-    def self.deep_handle_attributes_from_params!(hash)
-      hash.keys.each do |key|
-        val = hash.delete(key)
-        short_key = key.to_s.gsub(/_attributes$/, '')
-        if val.is_a?(Hash) && (Integer(val.keys.first) rescue false)
-          # a hash of the form {'0' => {'attr' => 'value'},...}
-          hash[short_key] = val.values.map do |attrs|
-            deep_handle_attributes_from_params!(attrs)
+          acc = []
+          if attr_collection.is_a?(Hash) # params-style 'array' as a hash
+            attr_collection.each_pair do |index, attributes|
+              current_attributes =
+                send(storage_attr)[relationship_name].try(:[], index.to_i) || {}
+              acc[index.to_i] =
+                model_class.new(current_attributes.merge(attributes))
+            end
+          else # array of attributes
+            attr_collection.each_with_index do |attributes, index|
+              current_attributes =
+                send(storage_attr)[relationship_name].try(:[], index.to_i) || {}
+              acc << model_class.new(current_attributes.merge(attributes))
+            end
           end
-        elsif val.is_a?(Hash) # a non-collection hash value
-          hash[short_key] = deep_handle_attributes_from_params!(val)
-        else # a simple value
-          hash[short_key] = val
+
+          send("#{relationship_name}=", acc)
         end
       end
-
-      hash
     end
   end
 end

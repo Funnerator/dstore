@@ -14,10 +14,19 @@ module DStoreDocumentTest
     one :secondary_author, :class_name => 'Author'
     many :archived_posts, :class_name => 'Post'
 
+    class Location
+      include DStore::Document
+
+      attribute :name
+    end
+
     class Author
       include DStore::Document
 
       attribute :name
+      attribute :rank
+
+      one :location, :namespace => 'DStoreDocumentTest::Blog'
     end
 
     class Tag
@@ -32,17 +41,18 @@ module DStoreDocumentTest
       attribute :title
       attribute :body
 
-      one :location
+      one :location, :namespace => 'DStoreDocumentTest::Blog'
       many :tags
-
-      class Location
-        include DStore::Document
-
-        attribute :name
-      end
 
       class Tag < Blog::Tag
         attribute :category
+
+        many :whatevers
+
+        class Whatever
+          include DStore::Document
+          attribute :foo
+        end
       end
     end
   end
@@ -134,13 +144,13 @@ module DStoreDocumentTest
       end
 
       it 'writes nested relationships' do
-        blog.posts = [Blog::Post.new('name' => 'Cats and boxes')]
+        blog.posts = [Blog::Post.new('title' => 'Cats and boxes')]
         blog.tags  = [Blog::Tag.new('name' => 'cat')]
         blog.posts.first.tags = [Blog::Tag.new('name' => 'boxes')]
 
         blog.dstore.must_equal(
           'posts' => [
-            { 'name' => "Cats and boxes",
+            { 'title' => "Cats and boxes",
               'tags' => [{'name'=>"boxes"}] }
           ],
           'tags'=>[{'name'=>"cat"}]
@@ -197,29 +207,62 @@ module DStoreDocumentTest
     end
 
     describe '#*_attributes=' do
-      it 'removes _attributes from keys' do
-        blog.author_attributes = {
-          'name'                => 'Bob',
-          'location_attributes' => {'name' => 'Seattle'} }
+      describe 'for singular associations' do
+        it 'passes attributes though to ClassName.new ' do
+          blog.author_attributes = {'name' => 'Linus Torvolds'}
+          blog.author.name.must_equal 'Linus Torvolds'
+        end
 
-        blog.dstore['author'].must_equal(
-          "name"     => "Bob",
-          "location" => {"name" => "Seattle"} )
+        it 'merges attributes on existing values' do
+          blog.author = Blog::Author.new('name' => 'Linus Torvolds',
+                                         'rank' => '60')
+          blog.author_attributes = {'rank' => '60'}
+          blog.author.name.must_equal 'Linus Torvolds'
+        end
       end
 
-      it 'deeply turns params-type arrays into real arrays' do
-        # note: the schema here makes no sense, it's just to test recursion
-        blog.author_attributes = {
-          'name'            => 'Bob',
-          'tags_attributes' => {'0' => {
-            'another_attributes' => {'0' => {
-              'name' =>'seattle'}} }}}
+      describe 'for collection associations' do
+        it 'makes an array of ClassName.new from the hashes values' do
+          blog.posts_attributes = {
+            '0' => {'title' => 'Microprocessors'},
+            '1' => {'title' => 'Memory chips'} }
 
-        blog.dstore['author'].must_equal(
-          "name" => "Bob",
-          "tags" => [{"another"=>[{"name"=>"seattle"}]}] )
+          blog.posts.first.title.must_equal 'Microprocessors'
+          blog.posts.last.title.must_equal 'Memory chips'
+        end
+
+        it 'merges attributes on existing values based on hash key as id' do
+          blog.posts = [
+            Blog::Post.new('title' => 'On cats',
+                           'body'  => 'kittens...'),
+            Blog::Post.new('title' => 'On dogs',
+                           'body'  => 'WooF') ]
+
+          blog.posts_attributes = {
+            '0' => {'body'  => 'kittens kittens!'},
+            '1' => {'title' => 'Dogs'} }
+
+          blog.posts.first.title.must_equal 'On cats' # same
+          blog.posts.first.body.must_equal 'kittens kittens!' # changed
+          blog.posts.last.title.must_equal 'Dogs' # changed
+          blog.posts.last.body.must_equal 'WooF' # same
+        end
+      end
+
+      it 'recursively turns params-type arrays into real arrays' do
+        # note: the schema here makes no sense, it's just to test recursion
+        blog.posts_attributes = { '0' => {
+          'title'               => 'Super',
+          'location_attributes' => {'name' => 'Seattle'},
+          'tags_attributes' => {'0' => {
+            'whatevers_attributes' => {'0' => {
+              'foo' =>'bar'}} }}}}
+
+        blog.dstore['posts'].must_equal([
+          {"title"    => "Super",
+           "location" => {"name" => "Seattle"},
+           "tags"     => [{"whatevers" => [{"foo" => "bar"}]}]} ])
       end
     end
   end
-
 end
