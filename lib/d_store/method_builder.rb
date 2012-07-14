@@ -35,6 +35,14 @@ module DStore
       end
     end
 
+    def define_document_attributes_accessor(relationship_name, options = {})
+      if DStore::Helper.collection?(relationship_name, options)
+        define_collection_document_attributes_accessor(relationship_name, options)
+      else
+        define_singular_document_attributes_accessor(relationship_name, options)
+      end
+    end
+
     # Options:
     # * :class_name - specify which class to use for the relationship
     def define_singular_document_accessor(relationship_name, options = {})
@@ -75,7 +83,13 @@ module DStore
             send(storage_attr)[relationship_name] = relationship_object.dstore
           end
         end
+      end
+    end
 
+    def define_singular_document_attributes_accessor(relationship_name, options={})
+      storage_attr = @storage_attr
+      relationship_name = relationship_name.to_s
+      target_class.instance_eval do
         # def author_attributes
         #   dstore['author']
         # end
@@ -84,11 +98,11 @@ module DStore
         end
 
         # def author_attributes=(attributes)
-        #   current_attributes = dstore[:author]
+        #   current_attributes = author.as_json
         #   self.author = Blog::Author.new(current_attributes.merge(attributes))
         # end
         define_method "#{relationship_name}_attributes=" do |attributes|
-          current_attributes = send(storage_attr)[relationship_name] || {}
+          current_attributes = send(relationship_name).as_json
           send("#{relationship_name}=", DStore::Helper.class_name_from_column(
             :namespace  => options[:namespace] || self.class.name,
             :class_name => options[:class_name],
@@ -144,7 +158,14 @@ module DStore
             send(storage_attr)[relationship_name] = relationship_objects.map(&:dstore)
           end
         end
+      end
+    end
 
+    def define_collection_document_attributes_accessor(relationship_name, options={})
+
+      storage_attr = @storage_attr
+      relationship_name = relationship_name.to_s
+      target_class.instance_eval do
         # def posts_attributes
         #   dstore['posts']
         # end
@@ -156,15 +177,13 @@ module DStore
         #   acc = []
         #   if attr_collection.is_a?(Hash) # params-style 'array' as a hash
         #     attr_collection.each_pair do |index, attributes|
-        #       current_attributes =
-        #         dstore[:posts].try(:[], index.to_i) || {}
+        #       current_attributes = posts[index].as_json
         #       acc[index.to_i] =
         #         Blog::Post.new(current_attributes.merge(attributes))
         #     end
         #   else # array of attribute hashes
         #     attr_collection.each_with_index do |attributes, index|
-        #       current_attributes =
-        #         dstore[:posts].try(:[], index.to_i) || {}
+        #       current_attributes = posts[index].as_json
         #       acc << Blog::Post.new(current_attributes.merge(attributes))
         #     end
         #   end
@@ -182,21 +201,21 @@ module DStore
           if attr_collection.is_a?(Hash) # params-style 'array' as a hash
             attr_collection.each_pair do |index, attributes|
               current_attributes =
-                send(storage_attr)[relationship_name].try(:[], index.to_i) || {}
+                send(relationship_name)[index.to_i].try(:as_json) || {}
               acc[index.to_i] =
                 model_class.new(current_attributes.merge(attributes))
             end
           else # array of attributes
             attr_collection.each_with_index do |attributes, index|
               current_attributes =
-                send(storage_attr)[relationship_name].try(:[], index.to_i) || {}
+                send(relationship_name)[index.to_i].try(:as_json) || {}
               acc << model_class.new(current_attributes.merge(attributes))
             end
           end
 
           send("#{relationship_name}=", acc)
         end
-      end
-    end
-  end
+      end # instance eval
+    end # def
+  end # class MethodBuilder
 end

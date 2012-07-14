@@ -7,11 +7,15 @@ module DStore
             serialize storage_column, ::DStore::JSONSerializer
           end
 
-          ::DStore::MethodBuilder.new(self, storage_column).
-            define_document_accessor(column, options)
+          builder = ::DStore::MethodBuilder.new(self, storage_column)
+          builder.define_document_accessor(column, options)
+          builder.define_document_attributes_accessor(column, options)
         else
           serialize column, ::DStore::DocumentSerializer.new(
             column, {:namespace => self.name}.merge(options) )
+
+          ::DStore::MethodBuilder.new(self, column).
+            define_document_attributes_accessor(column, options)
         end
       end
     end

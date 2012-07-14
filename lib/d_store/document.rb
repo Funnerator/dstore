@@ -43,16 +43,19 @@ module DStore
 
       def dstore(relationship_name, options = {})
         @dstore_api.define_document_accessor(relationship_name, options)
+        @dstore_api.define_document_attributes_accessor(relationship_name, options)
       end
 
       def one(relationship_name, options = {})
         @dstore_api.define_singular_document_accessor(relationship_name, options)
+        @dstore_api.define_singular_document_attributes_accessor(relationship_name, options)
       end
 
       # Options:
       # * :class_name - specify which class to use for the relationship
       def many(relationship_name, options = {})
         @dstore_api.define_collection_document_accessor(relationship_name, options)
+        @dstore_api.define_collection_document_attributes_accessor(relationship_name, options)
       end
 
       def inherited(base)

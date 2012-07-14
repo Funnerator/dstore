@@ -135,6 +135,16 @@ module ActiveRecordTest
       blog.widgets.must_equal [Blog::Foo::Bar::Widget.new(:name => 'github')]
     end
 
+    it 'works with nested attribute assignment' do
+      blog.posts_attributes = { '0' => {
+        'title'           => 'Super',
+        'tags_attributes' => {'0' => {
+          'name' => 'foo' }} }}
+
+      blog.posts.first.title.must_equal 'Super'
+      blog.posts.first.tags.first.name.must_equal 'foo'
+    end
+
     def raw_deserialize(klass, id, column)
       JSON.parse(Blog.connection.execute(
         "select * from #{klass.table_name} where id = #{id}"
