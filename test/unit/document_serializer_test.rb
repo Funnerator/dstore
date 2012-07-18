@@ -77,6 +77,6 @@ describe 'DStore::DocumentSerializer' do
 
   it 'returns nil when dumping a singular document whose source is nil' do
     subject = DStore::DocumentSerializer.new(:blog)
-    subject.load(nil).must_equal nil
+    subject.dump(nil).must_equal nil
   end
 end
