@@ -65,9 +65,9 @@ describe 'DStore::DocumentSerializer' do
       Foo::Blog.new('title' => 'HeeeloOo'))
   end
 
-  it 'returns nil when loading a singular document whose source is nil' do
+  it 'returns an empty object when loading a singular document whose source is nil' do
     subject = DStore::DocumentSerializer.new(:blog)
-    subject.load(nil).must_equal nil
+    subject.load(nil).must_equal Blog.new
   end
 
   it 'returns [] when loading a collection document whose source is nil' do

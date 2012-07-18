@@ -27,13 +27,11 @@ module DStore
     end
 
     def load_singular(source)
-      return nil if source.nil?
-
       if source.is_a?(String)
         source = JSON.parse(source)
       end
 
-      @class_name.constantize.new(source)
+      @class_name.constantize.new(source || {})
     end
 
     def dump(document)
