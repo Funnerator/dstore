@@ -58,6 +58,7 @@ module DStore
         @dstore_api.define_collection_document_attributes_accessor(relationship_name, options)
       end
 
+      # Make documents work with inheritance
       def inherited(base)
         base.instance_variable_set('@dstore_api', DStore::MethodBuilder.new(base))
       end
