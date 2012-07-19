@@ -135,6 +135,14 @@ module DStoreDocumentTest
         blog.posts.first.class.must_equal Blog::Post
         blog.posts.first.title.must_equal 'Cats and boxes'
       end
+
+      describe 'when source is nil' do
+        before { blog.dstore.delete('posts') }
+
+        it 'returns an empty array (as opposed to nil)' do
+          blog.posts.must_equal []
+        end
+      end
     end
 
     describe 'nested relations' do

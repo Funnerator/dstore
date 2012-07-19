@@ -119,9 +119,9 @@ module DStore
       relationship_name = relationship_name.to_s
       target_class.instance_eval do
         # def posts
-        #   if dstore[:posts].any? && !instance_variable_defined?('@posts')
+        #   if !instance_variable_defined?('@posts')
         #     @posts = []
-        #     dstore[:posts].each do |post_attrs|
+        #     (dstore[:posts] || []).each do |post_attrs|
         #       @posts << Blog::Post.new(post_attrs)
         #     end
         #   end
