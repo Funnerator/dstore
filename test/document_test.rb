@@ -99,9 +99,17 @@ module DStoreDocumentTest
         blog.author.name.must_equal 'Mr Myowgi'
       end
 
-      it 'defaults nil sources to a loaded object (as opposed to nil)' do
-        blog.dstore['author'] = nil
-        blog.author.class.must_equal Blog::Author
+      describe 'when source is nil' do
+        before { blog.dstore.delete('author') }
+
+        it 'returns an empty document object (as opposed to nil)' do
+          blog.author.class.must_equal Blog::Author
+        end
+
+        it 'hooks the empty document into the storgae attribute' do
+          blog.author
+          blog.dstore['author'].wont_be :nil?
+        end
       end
     end
 

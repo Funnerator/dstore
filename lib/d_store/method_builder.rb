@@ -50,8 +50,8 @@ module DStore
       relationship_name = relationship_name.to_s
       target_class.instance_eval do
         # def author
-        #   if dstore[:author].any? && !instance_variable_defined?('@author')
-        #     @author = Blog::Author.new(dstore[:author])
+        #   if !instance_variable_defined?('@author')
+        #     @author = Blog::Author.new(dstore[:author] ||= {})
         #   end
         #
         #   @author
@@ -64,7 +64,7 @@ module DStore
                 :namespace  => options[:namespace] || self.class.name,
                 :class_name => options[:class_name],
                 :column     => relationship_name
-              ).constantize.new(send(storage_attr)[relationship_name] || {}) )
+              ).constantize.new(send(storage_attr)[relationship_name] ||= {}) )
           end
 
           instance_variable_get(ivar)
