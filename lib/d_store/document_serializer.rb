@@ -31,7 +31,7 @@ module DStore
         source = JSON.parse(source)
       end
 
-      @class_name.constantize.new(source || {})
+      @class_name.constantize.build(source || {})
     end
 
     def dump(document)

@@ -25,8 +25,13 @@ module DStoreDocumentTest
 
       attribute :name
       attribute :rank
+      attribute :type
 
       one :location, :namespace => 'DStoreDocumentTest::Blog'
+
+      class SpecialGuest < self
+        attribute :hometown
+      end
     end
 
     class Tag
@@ -278,6 +283,13 @@ module DStoreDocumentTest
           {"title"    => "Super",
            "location" => {"name" => "Seattle"},
            "tags"     => [{"whatevers" => [{"foo" => "bar"}]}]} ])
+      end
+    end
+
+    describe '#build' do
+      it 'instantiates a subclass based on the "type" attribute' do
+        author = Blog::Author.build('type' => 'SpecialGuest')
+        author.class.must_equal Blog::Author::SpecialGuest
       end
     end
   end

@@ -62,6 +62,35 @@ module DStore
       def inherited(base)
         base.instance_variable_set('@dstore_api', DStore::MethodBuilder.new(base))
       end
+
+      # Build only differs from initialize in that it allows for
+      # storing and instantiating subclasses based on an optional
+      # 'type' attribute.
+      #
+      # For example:
+      #
+      # class Blog
+      #   attribute :type
+      #
+      #   class PhotoBlog < Blog
+      #     many :photos
+      #   end
+      #
+      #   class TravelBlog < Blog
+      #     one :location
+      #   end
+      # end
+      #
+      # Blog.build('type' => 'PhotoBlog') # => Blog::PhotoBlog
+      def build(hash = {})
+        type = hash['type'] || hash[:type]
+
+        if type && !type.empty?
+          "#{self.name}::#{type}".constantize.new(hash)
+        else
+          new(hash)
+        end
+      end
     end
 
     # It would be great to do this in the integrations folder, but autoload
@@ -71,6 +100,7 @@ module DStore
       include ActiveModel::Conversion
       extend  ActiveModel::Naming
       def persisted?; false; end
+      def marked_for_destruction?; false; end
     end
   end
 end

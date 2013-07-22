@@ -51,7 +51,7 @@ module DStore
       target_class.instance_eval do
         # def author
         #   if !instance_variable_defined?('@author')
-        #     @author = Blog::Author.new(dstore[:author] ||= {})
+        #     @author = Blog::Author.build(dstore[:author] ||= {})
         #   end
         #
         #   @author
@@ -64,7 +64,7 @@ module DStore
                 :namespace  => options[:namespace] || self.class.name,
                 :class_name => options[:class_name],
                 :column     => relationship_name
-              ).constantize.new(send(storage_attr)[relationship_name] ||= {}) )
+              ).constantize.build(send(storage_attr)[relationship_name] ||= {}) )
           end
 
           instance_variable_get(ivar)
@@ -99,7 +99,7 @@ module DStore
 
         # def author_attributes=(attributes)
         #   current_attributes = author.as_json
-        #   self.author = Blog::Author.new(current_attributes.merge(attributes))
+        #   self.author = Blog::Author.build(current_attributes.merge(attributes))
         # end
         define_method "#{relationship_name}_attributes=" do |attributes|
           current_attributes = send(relationship_name).as_json
@@ -107,7 +107,7 @@ module DStore
             :namespace  => options[:namespace] || self.class.name,
             :class_name => options[:class_name],
             :column     => relationship_name
-          ).constantize.new(current_attributes.merge(attributes)) )
+          ).constantize.build(current_attributes.merge(attributes)) )
         end
       end
     end
@@ -122,7 +122,7 @@ module DStore
         #   if !instance_variable_defined?('@posts')
         #     @posts = []
         #     (dstore[:posts] || []).each do |post_attrs|
-        #       @posts << Blog::Post.new(post_attrs)
+        #       @posts << Blog::Post.build(post_attrs)
         #     end
         #   end
         #
@@ -138,7 +138,7 @@ module DStore
                 :namespace  => options[:namespace] || self.class.name,
                 :class_name => options[:class_name],
                 :column     => relationship_name
-              ).constantize.new(attrs)
+              ).constantize.build(attrs)
             end
           end
 
@@ -179,12 +179,12 @@ module DStore
         #     attr_collection.each_pair do |index, attributes|
         #       current_attributes = posts[index].as_json
         #       acc[index.to_i] =
-        #         Blog::Post.new(current_attributes.merge(attributes))
+        #         Blog::Post.build(current_attributes.merge(attributes))
         #     end
         #   else # array of attribute hashes
         #     attr_collection.each_with_index do |attributes, index|
         #       current_attributes = posts[index].as_json
-        #       acc << Blog::Post.new(current_attributes.merge(attributes))
+        #       acc << Blog::Post.build(current_attributes.merge(attributes))
         #     end
         #   end
         #
@@ -203,13 +203,13 @@ module DStore
               current_attributes =
                 send(relationship_name)[index.to_i].try(:as_json) || {}
               acc[index.to_i] =
-                model_class.new(current_attributes.merge(attributes))
+                model_class.build(current_attributes.merge(attributes))
             end
           else # array of attributes
             attr_collection.each_with_index do |attributes, index|
               current_attributes =
                 send(relationship_name)[index.to_i].try(:as_json) || {}
-              acc << model_class.new(current_attributes.merge(attributes))
+              acc << model_class.build(current_attributes.merge(attributes))
             end
           end
 
