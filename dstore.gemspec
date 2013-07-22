@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.name        = "dstore"
   s.version     = DStore::VERSION
   s.authors     = ["Woody Peterson"]
-  s.email       = ["woody@funnerator.com"]
+  s.email       = ["woody@sigby.com"]
   s.homepage    = ""
   s.summary     = %q{TODO: Write a gem summary}
   s.description = %q{TODO: Write a gem description}
@@ -21,4 +21,5 @@ Gem::Specification.new do |s|
   # specify any dependencies here; for example:
   # s.add_development_dependency "rspec"
   # s.add_runtime_dependency "rest-client"
+  s.add_development_dependency 'activerecord'
 end
