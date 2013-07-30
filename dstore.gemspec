@@ -8,8 +8,8 @@ Gem::Specification.new do |s|
   s.authors     = ["Woody Peterson"]
   s.email       = ["woody@sigby.com"]
   s.homepage    = ""
-  s.summary     = %q{TODO: Write a gem summary}
-  s.description = %q{TODO: Write a gem description}
+  s.summary     = %q{Semi-structured data for any field}
+  s.description = %q{Turn any field into a nested semi-structured document}
 
   s.rubyforge_project = "dstore"
 
