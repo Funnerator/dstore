@@ -128,55 +128,55 @@ Here, Blog just has a `dstore` text field:
 
 * Supports `one` and `many` simple nested documents, ex:
 
-    class Blog
-      include DStore::Document
+        class Blog
+          include DStore::Document
 
-      one :author
-      many :books
+          one :author
+          many :books
 
-      # ...
-    end
+          # ...
+        end
 
 * ORM agnostic, with ActiveRecord support built in. Configure document
   fields via `ActiveRecord::Base::dstore`
 
 * Supports one or multiple storage fields per ActiveRecord model via `in`, ex:
 
-    class Blog < ActiveRecord::Base
-      dstore :author # stored in #author field
-      dstore :books, in: :foostore # stored in #foostore field
-      dstore :morefoo, in: :foostore # also stored in #foostore field
+        class Blog < ActiveRecord::Base
+          dstore :author # stored in #author field
+          dstore :books, in: :foostore # stored in #foostore field
+          dstore :morefoo, in: :foostore # also stored in #foostore field
 
-      # ...
-    end
+          # ...
+        end
 
 * Can namespace documents for sharing, (contrived) ex:
 
-    class Blog
-      include DStore::Document
+        class Blog
+          include DStore::Document
 
-      one :author, namespace: 'Documents'
-    end
+          one :author, namespace: 'Documents'
+        end
 
-    module Documents
-      class Author
-        include DStore::Document
-        attribute :name
-      end
-    end
+        module Documents
+          class Author
+            include DStore::Document
+            attribute :name
+          end
+        end
 
-# Can specify the class name:
+* Can specify the class name:
 
-    class Blog
-      include DStore::Document
+        class Blog
+          include DStore::Document
 
-      one :author, class_name: 'Foobar'
+          one :author, class_name: 'Foobar'
 
-      class Foobar
-        include DStore::Document
-        attribute :name
-      end
-    end
+          class Foobar
+            include DStore::Document
+            attribute :name
+          end
+        end
 
 ## Installation
 
